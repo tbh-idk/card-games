@@ -387,7 +387,7 @@ async def GoldFish(ctx):
     
     quadsRevealed = dict()
     for p in playerHands:
-        quadsRevealed[p] = len(playerHands[p]['revealed'])
+        quadsRevealed[p] = len(playerHands[p]['revealed'])/4
     print(quadsRevealed)
     winners = dict()
     for p in quadsRevealed:
