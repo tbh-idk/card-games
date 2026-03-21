@@ -613,6 +613,8 @@ async def CrazyEights(ctx):
             if len(playerHands[p]) == 0:
                 await gameThread.send(f"<@{p}> won this round")
 
+        await gameThread.archive(True)
+
 
 
 
