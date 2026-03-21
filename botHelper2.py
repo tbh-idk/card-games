@@ -9,6 +9,8 @@
 from enum import Enum, IntEnum
 from random import shuffle as Shuffle
 
+import asyncio
+
 WAIT_BEFORE_GAME_STARTS = 10
 
 class Suit(Enum):
@@ -123,3 +125,12 @@ class Deck:
 
     def __len__(self):
         return len(self.deck)
+    
+class Helper:
+    async def wait_until(gameThread, conditon, timeout=30, timeoutMessage=""): #, **kwargs
+        count = 0
+        while not(conditon()) and count<timeout:
+            await asyncio.sleep(1)
+            count += 1
+        if count>=timeout and timeoutMessage: #time out clause
+            await gameThread.send(timeoutMessage)
