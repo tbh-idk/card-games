@@ -104,7 +104,7 @@ async def BlackJack(ctx,
 
         await gameThread.send("Click to see hand", view=revealHandView)
 
-        await Helper.wait_until(lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
+        await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
 
         standPlayers = set()
         async def actionButtonHitCallback(interaction):
@@ -395,7 +395,6 @@ async def GoldFish(ctx):
             winners[quadsRevealed[p]].append(p)
         else:
              winners[quadsRevealed[p]] = [p]
-    winners = dict()
     print(winners)
     
     winnerEmbed = Embed(color=int("210201", 16))
