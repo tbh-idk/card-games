@@ -887,7 +887,12 @@ async def TicTacToe(ctx):
 
 
 
-
+# not finished
+'''
+TODO:
+    [ ] swap face up cards
+    [ ] play threeUp / threeDown
+'''
 @bot.slash_command(name="idiot",
                    description="Play a game of Idiot!",
                    guild_ids=[901191055028936774])
@@ -992,7 +997,7 @@ async def Idiot(ctx):
 
     await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
 
-    ## swap face up cards
+    ## TODO: swap face up cards
 
     async def askCards(p):
         nonlocal askCard, previousInteraction, playerHands, discards, chosenCard, topCard
@@ -1127,5 +1132,6 @@ async def Idiot(ctx):
                 playing = False
                 break
 
+    await gameThread.archive(True)
 
 bot.run(TOKEN)
