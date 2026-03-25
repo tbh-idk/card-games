@@ -134,3 +134,5 @@ class Helper:
             count += 1
         if count>=timeout and timeoutMessage: #time out clause
             await gameThread.send(timeoutMessage)
+        if count>=timeout: return False
+        else: return True

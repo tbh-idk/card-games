@@ -17,6 +17,7 @@ import asyncio
 
 from botHelper2 import WAIT_BEFORE_GAME_STARTS
 from botHelper2 import Card, Deck, Value, Suit
+from botHelper2 import Helper
 
 import os
 from dotenv import load_dotenv
@@ -35,14 +36,14 @@ bot = commands.Bot(intents=intents)
 async def BlackJack(ctx, 
                     decks: Option(int, "How many decks to use?", required=False, default=1)):
 
-    async def wait_until(conditon, timeout=30, timeoutMessage=""): #, **kwargs
-        nonlocal gameThread, gameThreadMembers, revealHandClicked, standPlayers
-        count = 0
-        while not(conditon()) and count<timeout:
-            await asyncio.sleep(1)
-            count += 1
-        if count>=timeout and timeoutMessage: #time out clause
-            await gameThread.send(timeoutMessage)
+    # async def wait_until(conditon, timeout=30, timeoutMessage=""): #, **kwargs
+    #     nonlocal gameThread, gameThreadMembers, revealHandClicked, standPlayers
+    #     count = 0
+    #     while not(conditon()) and count<timeout:
+    #         await asyncio.sleep(1)
+    #         count += 1
+    #     if count>=timeout and timeoutMessage: #time out clause
+    #         await gameThread.send(timeoutMessage)
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"BlackJack {ctx.interaction.id}")
@@ -63,7 +64,7 @@ async def BlackJack(ctx,
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await wait_until(lambda: gameThread.member_count-1 >= 7, WAIT_BEFORE_GAME_STARTS)
+    await Helper.wait_until(gameThread, lambda: gameThread.member_count-1 >= 7, WAIT_BEFORE_GAME_STARTS)
 
     joinGameButton.disabled = True
     joinGameView = View()
@@ -103,7 +104,7 @@ async def BlackJack(ctx,
 
         await gameThread.send("Click to see hand", view=revealHandView)
 
-        await wait_until(lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
+        await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
 
         standPlayers = set()
         async def actionButtonHitCallback(interaction):
@@ -135,7 +136,7 @@ async def BlackJack(ctx,
         actionButtonView.add_item(actionButtonStand)
 
         await gameThread.send(view=actionButtonView)
-        await wait_until(lambda: len(standPlayers) == len(gameThreadMembers), 600)
+        await Helper.wait_until(gameThread, lambda: len(standPlayers) == len(gameThreadMembers), 600)
 
         playerScores = {}
         for m in gameThreadMembers:
@@ -193,16 +194,16 @@ async def BlackJack(ctx,
                    description="Play a game of Go Fish!",
                    guild_ids=[901191055028936774]) #
 async def GoldFish(ctx):
-    async def wait_until(conditon, timeout=30, timeoutMessage=""):
-        nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
-        count = 0
-        while not(conditon()) and count<timeout:
-            await asyncio.sleep(1)
-            count += 1
-        if count>=timeout and timeoutMessage: #time out clause
-            await gameThread.send(timeoutMessage)
-        if count>=timeout: return False
-        else: return True
+    # async def wait_until(conditon, timeout=30, timeoutMessage=""):
+    #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
+    #     count = 0
+    #     while not(conditon()) and count<timeout:
+    #         await asyncio.sleep(1)
+    #         count += 1
+    #     if count>=timeout and timeoutMessage: #time out clause
+    #         await gameThread.send(timeoutMessage)
+    #     if count>=timeout: return False
+    #     else: return True
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"GoFish {ctx.interaction.id}")
@@ -224,7 +225,7 @@ async def GoldFish(ctx):
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await wait_until(lambda: len(gameThreadMembers) >= 5 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
+    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) >= 5 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
     if len(gameThreadMembers) == 1:
         joinGameButton.disabled = True
         await gameThread.send(f"not enough people\n{gameThread.member_count}")
@@ -260,7 +261,7 @@ async def GoldFish(ctx):
     readyView.add_item(readyButton)
     await gameThread.send(view=readyView)
 
-    ready = await wait_until(lambda: len(currentInteraction) == len(gameThreadMembers))
+    ready = await Helper.wait_until(gameThread, lambda: len(currentInteraction) == len(gameThreadMembers))
     if not(ready):
         await gameThread.send("not everyone is ready")
         await gameThread.archive(True)
@@ -292,7 +293,7 @@ async def GoldFish(ctx):
 
     await gameThread.send("Click to see hand", view=revealHandView)
 
-    await wait_until(lambda: len(revealHandClicked) == len(gameThreadMembers), 30)      
+    await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)      
 
     chosenRecipient = "" # type threadMember
     async def askRecipientCallback(interaction):
@@ -350,10 +351,10 @@ async def GoldFish(ctx):
             # print(str([x.value for x in askRecipient.options])+"\n"+str([x.value for x in askCard.options]))
             # print(previousInteraction[p])
             await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Value, *playerHands[previousInteraction[p].user.id]['hand']))}\nWho do you to take from?", view=askViewRecipient, ephemeral=True)
-            await wait_until(lambda: chosenRecipient != "")
+            await Helper.wait_until(gameThread, lambda: chosenRecipient != "")
 
             await previousInteraction[p].followup.send(f"What card do you want?", view=askViewCard, ephemeral=True)
-            await wait_until(lambda: chosenCard != "")
+            await Helper.wait_until(gameThread, lambda: chosenCard != "")
 
             await gameThread.send(f"<@{p}> asks <@{chosenRecipient}> for {chosenCard}")
 
@@ -386,7 +387,7 @@ async def GoldFish(ctx):
     
     quadsRevealed = dict()
     for p in playerHands:
-        quadsRevealed[p] = len(playerHands[p]['revealed'])
+        quadsRevealed[p] = len(playerHands[p]['revealed'])/4
     print(quadsRevealed)
     winners = dict()
     for p in quadsRevealed:
@@ -394,7 +395,6 @@ async def GoldFish(ctx):
             winners[quadsRevealed[p]].append(p)
         else:
              winners[quadsRevealed[p]] = [p]
-    winners = dict()
     print(winners)
     
     winnerEmbed = Embed(color=int("210201", 16))
@@ -416,16 +416,16 @@ async def GoldFish(ctx):
                    description="Play a game of Crazy Eights!",
                    guild_ids=[901191055028936774])
 async def CrazyEights(ctx):
-    async def wait_until(conditon, timeout=30, timeoutMessage=""):
-        nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
-        count = 0
-        while not(conditon()) and count<timeout:
-            await asyncio.sleep(1)
-            count += 1
-        if count>=timeout and timeoutMessage: #time out clause
-            await gameThread.send(timeoutMessage)
-        if count>=timeout: return False
-        else: return True
+    # async def wait_until(conditon, timeout=30, timeoutMessage=""):
+    #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
+    #     count = 0
+    #     while not(conditon()) and count<timeout:
+    #         await asyncio.sleep(1)
+    #         count += 1
+    #     if count>=timeout and timeoutMessage: #time out clause
+    #         await gameThread.send(timeoutMessage)
+    #     if count>=timeout: return False
+    #     else: return True
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"Crazy8s {ctx.interaction.id}")
@@ -447,7 +447,7 @@ async def CrazyEights(ctx):
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await wait_until(lambda: len(gameThreadMembers) >= 4 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
+    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) >= 4 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
     if len(gameThreadMembers) == 1:
         joinGameButton.disabled = True
         await gameThread.send(f"not enough people\n{gameThread.member_count}")
@@ -482,7 +482,7 @@ async def CrazyEights(ctx):
     readyView.add_item(readyButton)
     await gameThread.send(view=readyView)
 
-    ready = await wait_until(lambda: len(currentInteraction) == len(gameThreadMembers))
+    ready = await Helper.wait_until(gameThread, lambda: len(currentInteraction) == len(gameThreadMembers))
     if not(ready):
         await gameThread.send("not everyone is ready")
         await gameThread.archive(True)
@@ -514,7 +514,7 @@ async def CrazyEights(ctx):
 
     await gameThread.send("Click to see hand", view=revealHandView)
 
-    await wait_until(lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
+    await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
 
 
     chosenCard = "" # type CARD
@@ -572,7 +572,7 @@ async def CrazyEights(ctx):
                 playerHands[p].append(DECK.draw())
                 chosenCard = None
 
-            await wait_until(lambda: chosenCard != "")
+            await Helper.wait_until(gameThread, lambda: chosenCard != "")
             
             if chosenCard:
                 for c in playerHands[p]: 
@@ -595,7 +595,7 @@ async def CrazyEights(ctx):
                     suitSelectView = View()
                     suitSelectView.add_item(suitSelect)
                     await previousInteraction[p].followup.send("Chose a suit to change to", view=suitSelectView, ephemeral=True)
-                    await wait_until(lambda: newSuit != "")
+                    await Helper.wait_until(gameThread, lambda: newSuit != "")
 
                     topSuit = newSuit
                     await gameThread.send(f"<@{p}> changed the suit to {newSuit}")
@@ -610,8 +610,10 @@ async def CrazyEights(ctx):
                 break 
         
         for p in playerHands:
-            if len(playerHands[P]) == 0:
-                await gameThread.send(f"<@{P}> won this round")
+            if len(playerHands[p]) == 0:
+                await gameThread.send(f"<@{p}> won this round")
+
+        await gameThread.archive(True)
 
 
 
@@ -622,16 +624,16 @@ async def CrazyEights(ctx):
                    description="Play a game of Tic- Tac-Toe!",
                    guild_ids=[901191055028936774])
 async def TicTacToe(ctx):
-    async def wait_until(conditon, timeout=30, timeoutMessage=""): #, **kwargs
-        nonlocal gameThread, gameThreadMembers
-        count = 0
-        while not(conditon()) and count<timeout:
-            await asyncio.sleep(1)
-            count += 1
-        if count>=timeout and timeoutMessage: #time out clause
-            await gameThread.send(timeoutMessage)
-        if count>=timeout: return False
-        else: return True
+    # async def wait_until(conditon, timeout=30, timeoutMessage=""): #, **kwargs
+    #     nonlocal gameThread, gameThreadMembers
+    #     count = 0
+    #     while not(conditon()) and count<timeout:
+    #         await asyncio.sleep(1)
+    #         count += 1
+    #     if count>=timeout and timeoutMessage: #time out clause
+    #         await gameThread.send(timeoutMessage)
+    #     if count>=timeout: return False
+    #     else: return True
 
         
 
@@ -655,7 +657,7 @@ async def TicTacToe(ctx):
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await wait_until(lambda: len(gameThreadMembers) == 2, WAIT_BEFORE_GAME_STARTS)
+    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) == 2, WAIT_BEFORE_GAME_STARTS)
     joinGameButton.disabled = True
     joinGameView = View()
     joinGameView.add_item(joinGameButton)
@@ -679,7 +681,7 @@ async def TicTacToe(ctx):
     readyView.add_item(readyButton)
     await gameThread.send(view=readyView)
 
-    ready = await wait_until(lambda: len(currentInteraction) == len(gameThreadMembers))
+    ready = await Helper.wait_until(gameThread, lambda: len(currentInteraction) == len(gameThreadMembers))
     if not(ready):
         await gameThread.send("not everyone is ready")
         await gameThread.archive(True)
@@ -860,7 +862,7 @@ async def TicTacToe(ctx):
             chooseSpotView.enable_all_items()
             controlMessage[p] = await controlMessage[p].edit(f"You are {symbols[gameThreadMembers.index(p)]}. \nYour turn", view=chooseSpotView) #, ephemeral=True
 
-            await wait_until(lambda: turnFinish)
+            await Helper.wait_until(gameThread, lambda: turnFinish)
             # print(turnFinish)
             board[position[0]][position[1]] = symbols[gameThreadMembers.index(p)]
             await updateBoard()
@@ -885,21 +887,26 @@ async def TicTacToe(ctx):
 
 
 
-
+# not finished
+'''
+TODO:
+    [ ] swap face up cards
+    [ ] play threeUp / threeDown
+'''
 @bot.slash_command(name="idiot",
                    description="Play a game of Idiot!",
                    guild_ids=[901191055028936774])
 async def Idiot(ctx):
-    async def wait_until(conditon, timeout=30, timeoutMessage=""):
-        nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
-        count = 0
-        while not(conditon()) and count<timeout:
-            await asyncio.sleep(1)
-            count += 1
-        if count>=timeout and timeoutMessage: #time out clause
-            await gameThread.send(timeoutMessage)
-        if count>=timeout: return False
-        else: return True
+    # async def wait_until(conditon, timeout=30, timeoutMessage=""):
+    #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
+    #     count = 0
+    #     while not(conditon()) and count<timeout:
+    #         await asyncio.sleep(1)
+    #         count += 1
+    #     if count>=timeout and timeoutMessage: #time out clause
+    #         await gameThread.send(timeoutMessage)
+    #     if count>=timeout: return False
+    #     else: return True
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"Idiot {ctx.interaction.id}")
@@ -921,7 +928,7 @@ async def Idiot(ctx):
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await wait_until(lambda: len(gameThreadMembers) >= 4 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
+    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) >= 4 and len(gameThreadMembers) >= 2, WAIT_BEFORE_GAME_STARTS)
     if len(gameThreadMembers) == 1:
         joinGameButton.disabled = True
         await gameThread.send(f"not enough people\n{gameThread.member_count}")
@@ -956,7 +963,7 @@ async def Idiot(ctx):
     readyView.add_item(readyButton)
     await gameThread.send(view=readyView)
 
-    ready = await wait_until(lambda: len(currentInteraction) == len(gameThreadMembers))
+    ready = await Helper.wait_until(gameThread, lambda: len(currentInteraction) == len(gameThreadMembers))
     if not(ready):
         await gameThread.send("not everyone is ready")
         await gameThread.archive(True)
@@ -988,9 +995,9 @@ async def Idiot(ctx):
 
     await gameThread.send("Click to see hand", view=revealHandView)
 
-    await wait_until(lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
+    await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
 
-    ## swap face up cards
+    ## TODO: swap face up cards
 
     async def askCards(p):
         nonlocal askCard, previousInteraction, playerHands, discards, chosenCard, topCard
@@ -1097,7 +1104,7 @@ async def Idiot(ctx):
             #     chosenCard = None
             await askCards(p)
 
-            await wait_until(lambda: chosenCard == None or len(chosenCard) != 0)
+            await Helper.wait_until(gameThread, lambda: chosenCard == None or len(chosenCard) != 0)
 
             if chosenCard:
                 for c in playerHands[p]['hand'].copy():
@@ -1125,5 +1132,6 @@ async def Idiot(ctx):
                 playing = False
                 break
 
+    await gameThread.archive(True)
 
 bot.run(TOKEN)
