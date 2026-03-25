@@ -554,7 +554,7 @@ async def CrazyEights(ctx):
                 playerHands[p].append(DECK.draw())
                 chosenCard = ""
                 newSuit = ""
-                continue
+                
 
             playerEmbedDict = {}
             for P in playerHands:
