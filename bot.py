@@ -548,6 +548,14 @@ async def CrazyEights(ctx):
                 newSuit = ""
                 continue
 
+            if chosenCard and chosenCard.getValue() == Value.TWO:
+                await gameThread.send(f"<@{p}> draws two")
+                playerHands[p].append(DECK.draw())
+                playerHands[p].append(DECK.draw())
+                chosenCard = ""
+                newSuit = ""
+                continue
+
             playerEmbedDict = {}
             for P in playerHands:
                     playerEmbedDict[P] = Embed(title=bot.get_user(P),
