@@ -137,7 +137,7 @@ class Helper:
         if count>=timeout: return False
         else: return True
 
-class PlayHand:
+class PlayerHand:
 
     def __init__(self, playerId):
         self.playerId = playerId

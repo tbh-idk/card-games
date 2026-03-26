@@ -411,7 +411,6 @@ async def GoldFish(ctx):
 
 
 
-# TODO: fix selection disabled 
 # TODO: fix first card 8
 @bot.slash_command(name="crazy8s",
                    description="Play a game of Crazy Eights!",
@@ -899,8 +898,8 @@ async def TicTacToe(ctx):
 # not finished
 '''
 TODO:
-    [ ] swap face up cards
     [ ] play threeUp / threeDown
+    [ ] swap face up cards
 '''
 @bot.slash_command(name="idiot",
                    description="Play a game of Idiot!",
@@ -980,10 +979,18 @@ async def Idiot(ctx):
 
     playerHands = {}
     for m in gameThreadMembers:
-        playerHands[m.id] = {'hand':[DECK.draw()],'threeUp':[],'threeDown':[]}
-    for _ in range(2):
+        playerHands[m.id] = {'hand':[],'threeUp':[],'threeDown':[]}
+    for _ in range(3):
         for m in gameThreadMembers:
             playerHands[m.id]['hand'].append(DECK.draw())
+    for _ in range(3):
+        for m in gameThreadMembers:
+            playerHands[m.id]['threeUp'].append(DECK.draw())
+    for _ in range(3):
+        for m in gameThreadMembers:
+            playerHands[m.id]['threeDown'].append(DECK.draw())
+    for p in playerHands:
+        await gameThread.send(f"<@{p}>'s face up cards\n{', '.join(str(card) for card in playerHands[p]['threeUp'])}")
 
     previousInteraction = currentInteraction
     revealHandClicked = set([])
@@ -1011,7 +1018,7 @@ async def Idiot(ctx):
     async def askCards(p):
         nonlocal askCard, previousInteraction, playerHands, discards, chosenCard, topCard
         if len(askCard.options) != 0: 
-            askCard.max_values = len(askCard.options) if len(askCard.options) <= 3 else 4
+            
             shownHand = ""
             if playerHands[p]['hand']:
                 shownHand = ', '.join(str(card) for card in Card.Sort(Value, *playerHands[p]['hand']))
@@ -1073,7 +1080,17 @@ async def Idiot(ctx):
                     for card in playerHands[p]['hand']:
                         if valList.index(card.getValue()) <= valList.index(topValue) or card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN:
                             askCard.add_option(label=str(card), value=f"{card}")
+                # askCard.max_values = len(askCard.options) if len(askCard.options) <= 3 else 4
+                match len(askCard.options):
+                    case length if length == 0:
+                        askCard.max_values = 1
+                    case length if length <=3:
+                        askCard.max_values = len(askCard.options)
+                    case _:
+                        askCard.max_values = 4
             elif playerHands[p]['threeUp']:
+                print(f'three up {p}')
+                await gameThread.send(f"<@{p}> is on their face up cards\n{', '.join(str(card) for card in playerHands[p]['threeUp'])}")
                 if (topValue == None):
                     for card in playerHands[p]['threeUp']:
                         askCard.add_option(label=str(card), value=f"{card}")
@@ -1085,8 +1102,13 @@ async def Idiot(ctx):
                     for card in playerHands[p]['threeUp']:
                         if valList.index(card.getValue()) <= valList.index(topValue) or card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN:
                             askCard.add_option(label=str(card), value=f"{card}")
+                askCard.max_values = 1
             elif playerHands[p]['threeDown']:
-                pass
+                print(f'three down {p}')
+                await gameThread.send(f"<@{p}> is on their face down cards")
+                askCard.max_values = 1
+                playing = False
+                break
                 # if (topValue == None):
                 #     for card in playerHands[p]['threeDown']:
                 #         askCard.add_option(label=str(card), value=f"{card}")
@@ -1116,15 +1138,36 @@ async def Idiot(ctx):
             await Helper.wait_until(gameThread, lambda: chosenCard == None or len(chosenCard) != 0)
 
             if chosenCard:
-                for c in playerHands[p]['hand'].copy():
-                    if (str(c) in chosenCard):
-                        chosenCard[chosenCard.index(str(c))] = c
-                        playerHands[p]['hand'].remove(c)
-                    else:
-                        pass
+                if playerHands[p]['hand']:
+                    for c in playerHands[p]['hand'].copy():
+                        if (str(c) in chosenCard):
+                            chosenCard[chosenCard.index(str(c))] = c
+                            playerHands[p]['hand'].remove(c)
+                        else:
+                            pass
+                elif playerHands[p]['threeUp']:
+                    for c in playerHands[p]['threeUp'].copy():
+                        if (str(c) in chosenCard):
+                            chosenCard[chosenCard.index(str(c))] = c
+                            playerHands[p]['threeUp'].remove(c)
+                        else:
+                            pass
+                elif playerHands[p]['threeDown']:
+                    for c in playerHands[p]['threeDown'].copy():
+                        if (str(c) in chosenCard):
+                            chosenCard[chosenCard.index(str(c))] = c
+                            playerHands[p]['threeDown'].remove(c)
+                        else:
+                            pass
+
                 await gameThread.send(f"<@{p}> plays {','.join(str(c) for c in chosenCard)}")
                 topCard = chosenCard[0]
-                topValue = chosenCard[0].getValue()
+                try:
+                    topValue = chosenCard[0].getValue()
+                except AttributeError:
+                    print(chosenCard)
+                    print(type(chosenCard[0]))
+                    raise
                 discards.extend(chosenCard)
 
                 if topValue == Value.TEN: 
@@ -1137,9 +1180,10 @@ async def Idiot(ctx):
             while len(playerHands[p]['hand']) < 3 and len(DECK) > 0:
                 playerHands[p]['hand'].append(DECK.draw())
             
-            if len(DECK) == 0:
+            if prod(len(playerHands[P]['threeDown']) for P in playerHands) == 0: 
                 playing = False
-                break
+                break 
+    # TODO: announce winner
 
     await gameThread.archive(True)
 
