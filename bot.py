@@ -1123,6 +1123,7 @@ async def Idiot(ctx):
             askCard.callback = askCardCallback
             askCardView = View()
             askCardView.add_item(askCard)
+            await askCards(p)
 
             await Helper.wait_until(gameThread, lambda: chosenCard == None or len(chosenCard) != 0)
 
@@ -1184,9 +1185,9 @@ async def Idiot(ctx):
                 playing = False
                 break 
 
-    # for P in playerHands:
-    #     if len(playerHands[P]['threeDown']) == 0:
-    #         await gameThread.send(f"<@{P}> wins the game!")
+    for P in playerHands:
+        if len(playerHands[P]['threeDown']) == 0:
+            await gameThread.send(f"<@{P}> wins the game!")
 
     await gameThread.archive(True)
 
