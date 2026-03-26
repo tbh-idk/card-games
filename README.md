@@ -6,4 +6,4 @@ Games currently supported:
  - Tic-Tac-Toe (2 players)
 
 ### Notes
-I know this needs to be refactored. It will be done at some point
+This is in the process of being refactored...
