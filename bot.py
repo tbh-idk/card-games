@@ -895,10 +895,9 @@ async def TicTacToe(ctx):
 
 
 
-# not finished
 '''
 TODO:
-    [ ] play threeUp / threeDown
+    [x] play threeUp / threeDown
     [ ] swap face up cards
 '''
 @bot.slash_command(name="idiot",
@@ -1064,7 +1063,6 @@ async def Idiot(ctx):
                 topValue = None
 
             playerHands[p]['hand'] = Card.Sort(Value, *playerHands[p]['hand'])
-            # print(playerHands[p]['hand'])
 
 
             askCard = Select()
@@ -1080,7 +1078,7 @@ async def Idiot(ctx):
                     for card in playerHands[p]['hand']:
                         if valList.index(card.getValue()) <= valList.index(topValue) or card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN:
                             askCard.add_option(label=str(card), value=f"{card}")
-                # askCard.max_values = len(askCard.options) if len(askCard.options) <= 3 else 4
+                # TODO: change so the max value is the largest possible move
                 match len(askCard.options):
                     case length if length == 0:
                         askCard.max_values = 1
@@ -1107,8 +1105,9 @@ async def Idiot(ctx):
                 print(f'three down {p}')
                 await gameThread.send(f"<@{p}> is on their face down cards")
                 askCard.max_values = 1
-                playing = False
-                break
+                for card in playerHands[p]['threeDown']:
+                        if card: askCard.add_option(label=f"Card {str(playerHands[p]['threeDown'].index(card))}", value=f"{card}")
+                
                 # if (topValue == None):
                 #     for card in playerHands[p]['threeDown']:
                 #         askCard.add_option(label=str(card), value=f"{card}")
@@ -1125,16 +1124,6 @@ async def Idiot(ctx):
             askCardView = View()
             askCardView.add_item(askCard)
 
-            # if len(askCard.options) != 0: 
-            #     askCard.max_values = len(askCard.options) if len(askCard.options) <= 3 else 4
-            #     await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Value, *playerHands[p]['hand']))}\nChose a card to play", view=askCardView, ephemeral=True)
-            # else: 
-            #     await previousInteraction[p].followup.send("Cannot play a card")
-            #     playerHands[p]['hand'].extend(discards)
-            #     discards.clear()
-            #     chosenCard = None
-            await askCards(p)
-
             await Helper.wait_until(gameThread, lambda: chosenCard == None or len(chosenCard) != 0)
 
             if chosenCard:
@@ -1143,22 +1132,33 @@ async def Idiot(ctx):
                         if (str(c) in chosenCard):
                             chosenCard[chosenCard.index(str(c))] = c
                             playerHands[p]['hand'].remove(c)
-                        else:
-                            pass
+
                 elif playerHands[p]['threeUp']:
                     for c in playerHands[p]['threeUp'].copy():
                         if (str(c) in chosenCard):
                             chosenCard[chosenCard.index(str(c))] = c
                             playerHands[p]['threeUp'].remove(c)
-                        else:
-                            pass
+
                 elif playerHands[p]['threeDown']:
                     for c in playerHands[p]['threeDown'].copy():
                         if (str(c) in chosenCard):
                             chosenCard[chosenCard.index(str(c))] = c
+                            break
+                    card = chosenCard[0]
+                    if (card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN) or (topCard == None) or (topValue != Value.FIVE and valList.index(card.getValue()) >= valList.index(topValue)) or (topValue == Value.FIVE and valList.index(card.getValue()) < valList.index(topValue)):
                             playerHands[p]['threeDown'].remove(c)
-                        else:
-                            pass
+                    else:
+                        await gameThread.send(f"<@{p}> attempts to play a {','.join(str(c) for c in chosenCard)} but fails")
+                        discards.extend(chosenCard)
+                        playerHands[p]['threeDown'][playerHands[p]['threeDown'].index(card)] = None
+                        playerHands[p]['hand'].extend(discards)
+                        discards.clear()
+                        chosenCard = None
+                        topCard = ""
+                        continue
+
+                    
+
 
                 await gameThread.send(f"<@{p}> plays {','.join(str(c) for c in chosenCard)}")
                 topCard = chosenCard[0]
@@ -1183,7 +1183,10 @@ async def Idiot(ctx):
             if prod(len(playerHands[P]['threeDown']) for P in playerHands) == 0: 
                 playing = False
                 break 
-    # TODO: announce winner
+
+    for P in playerHands:
+        if len(playerHands[P]['threeDown']) == 0:
+            await gameThread.send(f"<@{P}> wins the game!")
 
     await gameThread.archive(True)
 
