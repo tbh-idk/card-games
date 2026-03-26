@@ -358,8 +358,8 @@ async def GoldFish(ctx):
 
             await gameThread.send(f"<@{p}> asks <@{chosenRecipient}> for {chosenCard}")
 
-            print("\n")
-            print(playerHands)
+            # print("\n")
+            # print(playerHands)
             # print(chosenCard)
             # print(playerHands[int(chosenRecipient)])
             if chosenCard in [str(card.getValue()) for card in playerHands[int(chosenRecipient)]['hand']]:
@@ -388,14 +388,14 @@ async def GoldFish(ctx):
     quadsRevealed = dict()
     for p in playerHands:
         quadsRevealed[p] = int(len(playerHands[p]['revealed'])/4)
-    print(quadsRevealed)
+    # print(quadsRevealed)
     winners = dict()
     for p in quadsRevealed:
         if quadsRevealed[p] in winners.keys():
             winners[quadsRevealed[p]].append(p)
         else:
              winners[quadsRevealed[p]] = [p]
-    print(winners)
+    # print(winners)
     
     winnerEmbed = Embed(color=int("210201", 16))
     winnerEmbed.title = (f"WINNER{'S' if len(winners) > 1 else ''}")
@@ -412,6 +412,7 @@ async def GoldFish(ctx):
 
 
 # TODO: fix selection disabled 
+# TODO: fix first card 8
 @bot.slash_command(name="crazy8s",
                    description="Play a game of Crazy Eights!",
                    guild_ids=[901191055028936774])
@@ -572,7 +573,8 @@ async def CrazyEights(ctx):
             askCardView.add_item(askCard)
 
             if len(askCard.options) != 0: 
-                await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[previousInteraction[p].user.id]))}\nChose a card to play", view=askCardView, ephemeral=True)
+                qq = await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[previousInteraction[p].user.id]))}\nChose a card to play", view=askCardView, ephemeral=True)
+                # print(qq.content)
             else: 
                 await previousInteraction[p].followup.send("Cannot play a card")
                 playerHands[p].append(DECK.draw())
@@ -616,11 +618,11 @@ async def CrazyEights(ctx):
                 playing = False
                 break 
         
-        for p in playerHands:
-            if len(playerHands[p]) == 0:
-                await gameThread.send(f"<@{p}> won this round")
+    for p in playerHands:
+        if len(playerHands[p]) == 0:
+            await gameThread.send(f"<@{p}> won this round")
 
-        await gameThread.archive(True)
+    await gameThread.archive(True)
 
 
 
@@ -1028,7 +1030,7 @@ async def Idiot(ctx):
     async def askCardCallback(interaction):
         nonlocal currentInteraction, chosenCard
         currentInteraction[interaction.user.id] = interaction
-        print(askCard.values)
+        # print(askCard.values)
         if len(set([c[0] for c in askCard.values])) == 1:
             # print(set([c[0] for c in askCard.values])) 
             chosenCard = askCard.values
