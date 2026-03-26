@@ -1182,6 +1182,7 @@ async def Idiot(ctx):
                 playerHands[p]['hand'].append(DECK.draw())
             
             if prod(len(playerHands[P]['threeDown']) for P in playerHands) == 0: 
+                print('end')
                 playing = False
                 break 
 
