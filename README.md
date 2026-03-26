@@ -4,6 +4,7 @@ Games currently supported:
  - Go Fish (2-5 players)
  - Crazy 8s (2-4 players)
  - Tic-Tac-Toe (2 players)
+ - Idiot (2-4 players)
 
 ### Notes
-I know this needs to be refactored. It will be done at some point
+This is in the process of being refactored...
