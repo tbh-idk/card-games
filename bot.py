@@ -632,23 +632,11 @@ async def CrazyEights(ctx):
                    description="Play a game of Tic- Tac-Toe!",
                    guild_ids=[901191055028936774])
 async def TicTacToe(ctx):
-    # async def wait_until(conditon, timeout=30, timeoutMessage=""): #, **kwargs
-    #     nonlocal gameThread, gameThreadMembers
-    #     count = 0
-    #     while not(conditon()) and count<timeout:
-    #         await asyncio.sleep(1)
-    #         count += 1
-    #     if count>=timeout and timeoutMessage: #time out clause
-    #         await gameThread.send(timeoutMessage)
-    #     if count>=timeout: return False
-    #     else: return True
-
-        
+      
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"TicTacToe {ctx.interaction.id}")
     gameThreadMembers = []
-    # await gameThread.add_user(ctx.author)
 
     async def joinGameButtonCallback(interaction):
         nonlocal gameThread
@@ -728,8 +716,6 @@ async def TicTacToe(ctx):
 
     async def leftButtonCallback(interaction):
         nonlocal position, board
-        # print('left')
-        # prev = board[position[0]][position[1]]
         newPosition = [position[0], (position[1] + 2)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [position[0], (position[1] + 1)%3]
@@ -742,8 +728,6 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def rightButtonCallback(interaction):
         nonlocal position, board
-        # print('right')
-        # prev = board[position[0]][position[1]]
         newPosition = [position[0], (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [position[0], (position[1] + 2)%3]
@@ -756,8 +740,6 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def upButtonCallback(interaction):
         nonlocal position, board
-        # print('up')
-        # prev = board[position[0]][position[1]]
         newPosition = [(position[0] + 2)%3, position[1]]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 1)%3, position[1]]
@@ -770,8 +752,6 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def downButtonCallback(interaction):
         nonlocal position, board
-        # print('down')
-        # prev = board[position[0]][position[1]]
         newPosition = [(position[0] + 1)%3, position[1]]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 2)%3, position[1]]
@@ -784,7 +764,6 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def upperRightButtonCallback(interaction):
         nonlocal position, board
-        # print('upperRight')
         newPosition = [(position[0] + 2)%3, (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 1)%3, (position[1] + 2)%3]
@@ -797,7 +776,6 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def lowerRightButtonCallback(interaction):
         nonlocal position, board
-        # print('upperRight')
         newPosition = [(position[0] + 1)%3, (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 2)%3, (position[1] + 2)%3]
@@ -809,7 +787,6 @@ async def TicTacToe(ctx):
         await updateBoard()
         await interaction.response.defer()
     async def selectButtonCallback(interaction):
-        # print('ok\n')
         if board[position[0]][position[1]] == '.':
             nonlocal turnFinish
             turnFinish = True
@@ -845,8 +822,6 @@ async def TicTacToe(ctx):
     controlMessage = dict()
     turnFinish = False
     for p in gameThreadMembers:
-        # print(p)
-        # print(p.id)
         controlMessage[p] = await currentInteraction[p].followup.send(f"You are {symbols[gameThreadMembers.index(p)]}. \nNot your turn", view=chooseSpotView, ephemeral=True)
 
     def gameOver():
@@ -871,7 +846,6 @@ async def TicTacToe(ctx):
             controlMessage[p] = await controlMessage[p].edit(f"You are {symbols[gameThreadMembers.index(p)]}. \nYour turn", view=chooseSpotView) #, ephemeral=True
 
             await Helper.wait_until(gameThread, lambda: turnFinish)
-            # print(turnFinish)
             board[position[0]][position[1]] = symbols[gameThreadMembers.index(p)]
             await updateBoard()
 
@@ -897,28 +871,16 @@ async def TicTacToe(ctx):
 
 '''
 TODO:
-    [x] play threeUp / threeDown
     [ ] swap face up cards
 '''
 @bot.slash_command(name="idiot",
                    description="Play a game of Idiot!",
                    guild_ids=[901191055028936774])
 async def Idiot(ctx):
-    # async def wait_until(conditon, timeout=30, timeoutMessage=""):
-    #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
-    #     count = 0
-    #     while not(conditon()) and count<timeout:
-    #         await asyncio.sleep(1)
-    #         count += 1
-    #     if count>=timeout and timeoutMessage: #time out clause
-    #         await gameThread.send(timeoutMessage)
-    #     if count>=timeout: return False
-    #     else: return True
 
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"Idiot {ctx.interaction.id}")
     gameThreadMembers = []
-    # await gameThread.add_user(ctx.author)
 
     async def joinGameButtonCallback(interaction):
         nonlocal gameThread
@@ -999,9 +961,7 @@ async def Idiot(ctx):
         interaction = previousInteraction[interaction.user.id]
         await interaction.response.send_message(f"{', '.join(str(card) for card in Card.Sort(Value, *playerHands[interaction.user.id]['hand']))}", 
                                                 ephemeral=True)
-        #await interaction.followup.send("hi", ephemeral=True)
         revealHandClicked.add(interaction.user.id)
-        # playerInteraction[interaction.user.id] = interaction
     revealHandButton = Button(label="See hand",
                             style=discord.ButtonStyle.blurple)
     revealHandButton.callback = revealHandCallback
@@ -1036,14 +996,10 @@ async def Idiot(ctx):
     async def askCardCallback(interaction):
         nonlocal currentInteraction, chosenCard
         currentInteraction[interaction.user.id] = interaction
-        # print(askCard.values)
         if len(set([c[0] for c in askCard.values])) == 1:
-            # print(set([c[0] for c in askCard.values])) 
             chosenCard = askCard.values
             interaction = await interaction.response.defer()
         else: 
-            # print(f"{set([c[0] for c in askCard.values])}\t{len(set([c[0] for c in askCard.values]))}")
-            # interaction = await interaction.response.defer()
             askCard.placeholder = "Multiple cards must match value"
             await askCards(interaction.user.id)
         
@@ -1108,17 +1064,6 @@ async def Idiot(ctx):
                 for card in playerHands[p]['threeDown']:
                         if card: askCard.add_option(label=f"Card {str(playerHands[p]['threeDown'].index(card))}", value=f"{card}")
                 
-                # if (topValue == None):
-                #     for card in playerHands[p]['threeDown']:
-                #         askCard.add_option(label=str(card), value=f"{card}")
-                # elif (topValue != Value.FIVE):
-                #     for card in playerHands[p]['threeDown']:
-                #         if valList.index(card.getValue()) >= valList.index(topValue) or card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN:
-                #             askCard.add_option(label=str(card), value=f"{card}")
-                # elif (topValue == Value.FIVE):
-                #     for card in playerHands[p]['threeDown']:
-                #         if valList.index(card.getValue()) <= valList.index(topValue) or card.getValue() == Value.TWO or card.getValue() == Value.FIVE or card.getValue() == Value.TEN:
-                #             askCard.add_option(label=str(card), value=f"{card}")
             askCard.placeholder = "Chose a card to play"
             askCard.callback = askCardCallback
             askCardView = View()
