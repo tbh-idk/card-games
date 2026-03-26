@@ -191,8 +191,7 @@ async def BlackJack(ctx,
 
 
 @bot.slash_command(name="go_fish",
-                   description="Play a game of Go Fish!",
-                   guild_ids=[901191055028936774]) #
+                   description="Play a game of Go Fish!") #
 async def GoldFish(ctx):
     # async def wait_until(conditon, timeout=30, timeoutMessage=""):
     #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
@@ -414,8 +413,7 @@ async def GoldFish(ctx):
 
 # TODO: fix first card 8
 @bot.slash_command(name="crazy8s",
-                   description="Play a game of Crazy Eights!",
-                   guild_ids=[901191055028936774])
+                   description="Play a game of Crazy Eights!")
 async def CrazyEights(ctx):
     # async def wait_until(conditon, timeout=30, timeoutMessage=""):
     #     nonlocal gameThread, gameThreadMembers, currentInteraction, previousInteraction, revealHandClicked#, playerInteraction
@@ -630,8 +628,7 @@ async def CrazyEights(ctx):
 
 
 @bot.slash_command(name="tic-tac-toe",
-                   description="Play a game of Tic- Tac-Toe!",
-                   guild_ids=[901191055028936774])
+                   description="Play a game of Tic- Tac-Toe!")
 async def TicTacToe(ctx):
       
 
@@ -876,8 +873,7 @@ TODO:
     [ ] swap face up cards
 '''
 @bot.slash_command(name="idiot",
-                   description="Play a game of Idiot!",
-                   guild_ids=[901191055028936774])
+                   description="Play a game of Idiot!")
 async def Idiot(ctx):
 
     channel = ctx.channel
