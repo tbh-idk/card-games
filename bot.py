@@ -411,6 +411,7 @@ async def GoldFish(ctx):
 
 
 
+
 # TODO: fix first card 8
 @bot.slash_command(name="crazy8s",
                    description="Play a game of Crazy Eights!",
@@ -869,6 +870,7 @@ async def TicTacToe(ctx):
 
 
 
+
 '''
 TODO:
     [ ] swap face up cards
@@ -1136,5 +1138,6 @@ async def Idiot(ctx):
             await gameThread.send(f"<@{P}> wins the game!")
 
     await gameThread.archive(True)
+
 
 bot.run(TOKEN)
