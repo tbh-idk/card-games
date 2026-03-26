@@ -387,7 +387,7 @@ async def GoldFish(ctx):
     
     quadsRevealed = dict()
     for p in playerHands:
-        quadsRevealed[p] = len(playerHands[p]['revealed'])/4
+        quadsRevealed[p] = int(len(playerHands[p]['revealed'])/4)
     print(quadsRevealed)
     winners = dict()
     for p in quadsRevealed:
@@ -411,7 +411,7 @@ async def GoldFish(ctx):
 
 
 
-
+# TODO: fix selection disabled 
 @bot.slash_command(name="crazy8s",
                    description="Play a game of Crazy Eights!",
                    guild_ids=[901191055028936774])
@@ -548,12 +548,10 @@ async def CrazyEights(ctx):
                 newSuit = ""
                 continue
 
-            if chosenCard and chosenCard.getValue() == Value.TWO:
-                await gameThread.send(f"<@{p}> draws two")
-                playerHands[p].append(DECK.draw())
-                playerHands[p].append(DECK.draw())
-                chosenCard = ""
-                newSuit = ""
+            # if chosenCard and chosenCard.getValue() == Value.TWO:
+            #     await gameThread.send(f"<@{p}> draws two")
+            #     playerHands[p].append(DECK.draw())
+            #     playerHands[p].append(DECK.draw())
                 
 
             playerEmbedDict = {}
@@ -587,6 +585,7 @@ async def CrazyEights(ctx):
                     if (str(c) == chosenCard):
                         chosenCard = c
                         playerHands[p].remove(c)
+                        #break?
                     else:
                         pass
                 topSuit = chosenCard.getSuit()
@@ -728,7 +727,7 @@ async def TicTacToe(ctx):
 
     async def leftButtonCallback(interaction):
         nonlocal position, board
-        print('left')
+        # print('left')
         # prev = board[position[0]][position[1]]
         newPosition = [position[0], (position[1] + 2)%3]
         if board[newPosition[0]][newPosition[1]] != None:
@@ -742,7 +741,7 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def rightButtonCallback(interaction):
         nonlocal position, board
-        print('right')
+        # print('right')
         # prev = board[position[0]][position[1]]
         newPosition = [position[0], (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
@@ -756,7 +755,7 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def upButtonCallback(interaction):
         nonlocal position, board
-        print('up')
+        # print('up')
         # prev = board[position[0]][position[1]]
         newPosition = [(position[0] + 2)%3, position[1]]
         if board[newPosition[0]][newPosition[1]] != None:
@@ -770,7 +769,7 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def downButtonCallback(interaction):
         nonlocal position, board
-        print('down')
+        # print('down')
         # prev = board[position[0]][position[1]]
         newPosition = [(position[0] + 1)%3, position[1]]
         if board[newPosition[0]][newPosition[1]] != None:
@@ -784,7 +783,7 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def upperRightButtonCallback(interaction):
         nonlocal position, board
-        print('upperRight')
+        # print('upperRight')
         newPosition = [(position[0] + 2)%3, (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 1)%3, (position[1] + 2)%3]
@@ -797,7 +796,7 @@ async def TicTacToe(ctx):
         await interaction.response.defer()
     async def lowerRightButtonCallback(interaction):
         nonlocal position, board
-        print('upperRight')
+        # print('upperRight')
         newPosition = [(position[0] + 1)%3, (position[1] + 1)%3]
         if board[newPosition[0]][newPosition[1]] != None:
             newPosition = [(position[0] + 2)%3, (position[1] + 2)%3]
@@ -809,7 +808,7 @@ async def TicTacToe(ctx):
         await updateBoard()
         await interaction.response.defer()
     async def selectButtonCallback(interaction):
-        print('ok\n')
+        # print('ok\n')
         if board[position[0]][position[1]] == '.':
             nonlocal turnFinish
             turnFinish = True

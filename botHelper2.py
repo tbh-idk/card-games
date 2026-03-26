@@ -136,3 +136,33 @@ class Helper:
             await gameThread.send(timeoutMessage)
         if count>=timeout: return False
         else: return True
+
+class PlayHand:
+
+    def __init__(self, playerId):
+        self.playerId = playerId
+        self.hand = []
+        self.revealed = []
+
+    def getPlayerId(self):
+        return self.playerId
+    
+    def getHand(self):
+        return self.hand
+    
+    def getRevealed(self):
+        return self.revealed
+    
+    def addToHand(self, card):
+        self.hand.append(card)
+    
+    def revealCard(self, card):
+        self.revealed.append(self.discard(card))
+
+
+    def discard(self, card):
+        try:
+            self.hand.remove(card)
+            return card
+        except ValueError as e:
+            raise ValueError(f'{e}\n{card} not in hand')
