@@ -534,7 +534,7 @@ async def CrazyEights(ctx):
     # [x] 8 (change suit)
     # [x] Q (skip)
     # [ ] A (reverse)
-    # [ ] 2 (draw two)
+    # [x] 2 (draw two)
     topCard = DECK.draw()
     topSuit = topCard.getSuit()
     topValue = topCard.getValue()
@@ -549,10 +549,10 @@ async def CrazyEights(ctx):
                 newSuit = ""
                 continue
 
-            # if chosenCard and chosenCard.getValue() == Value.TWO:
-            #     await gameThread.send(f"<@{p}> draws two")
-            #     playerHands[p].append(DECK.draw())
-            #     playerHands[p].append(DECK.draw())
+            if chosenCard and chosenCard.getValue() == Value.TWO:
+                await gameThread.send(f"<@{p}> draws two")
+                playerHands[p].append(DECK.draw())
+                playerHands[p].append(DECK.draw())
                 
 
             playerEmbedDict = {}
