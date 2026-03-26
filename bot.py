@@ -575,7 +575,7 @@ async def CrazyEights(ctx):
                 qq = await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[previousInteraction[p].user.id]))}\nChose a card to play", view=askCardView, ephemeral=True)
                 # print(qq.content)
             else: 
-                await previousInteraction[p].followup.send("Cannot play a card")
+                await previousInteraction[p].followup.send(f"<@{p}> cannot play a card")
                 playerHands[p].append(DECK.draw())
                 chosenCard = None
 
@@ -1027,7 +1027,7 @@ async def Idiot(ctx):
                 shownHand = ', '.join('🂠'*len(playerHands[p]['threeDown']))
             await previousInteraction[p].followup.send(f"{shownHand}\n", view=askCardView, ephemeral=True)
         else: 
-            await previousInteraction[p].followup.send("Cannot play a card")
+            await previousInteraction[p].followup.send(f"<@{p}> cannot play a card")
             playerHands[p]['hand'].extend(discards)
             discards.clear()
             chosenCard = None
@@ -1184,9 +1184,9 @@ async def Idiot(ctx):
                 playing = False
                 break 
 
-    for P in playerHands:
-        if len(playerHands[P]['threeDown']) == 0:
-            await gameThread.send(f"<@{P}> wins the game!")
+    # for P in playerHands:
+    #     if len(playerHands[P]['threeDown']) == 0:
+    #         await gameThread.send(f"<@{P}> wins the game!")
 
     await gameThread.archive(True)
 
