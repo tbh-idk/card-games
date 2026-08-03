@@ -50,6 +50,21 @@ class Card:
         return self._suit
     def getValue(self):
         return self._value
+    def getRank(self):
+        ValueToRank = {Value.ACE: 14,
+                      Value.TWO: 2,
+                      Value.THREE: 3,
+                      Value.FOUR: 4,
+                      Value.FIVE: 5,
+                      Value.SIX: 6,
+                      Value.SEVEN: 7,
+                      Value.EIGHT: 8,
+                      Value.NINE: 9,
+                      Value.TEN: 10,
+                      Value.JACK: 11,
+                      Value.QUEEN: 12,
+                      Value.KING: 13}
+        return ValueToRank[self._value]
     
     def __repr__(self) -> str:
         return f"<Card suit={self._suit} value={self._value}>"
