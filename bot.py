@@ -1143,7 +1143,8 @@ async def Idiot(ctx):
 
 @bot.slash_command(name="hearts",
                    description="Play a game of Hearts")
-async def HeartsGame(ctx):
+async def HeartsGame(ctx,
+                     maxPoints: Option(int, "How many points to play to?", required=False, default=100)):
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"Hearts {ctx.interaction.id}")
     gameThreadMembers = []
@@ -1163,8 +1164,8 @@ async def HeartsGame(ctx):
     joinGameView.add_item(joinGameButton)
     joinGameMessage = await ctx.respond(embed=joinGameEmbed, view=joinGameView)
 
-    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) == 2, WAIT_BEFORE_GAME_STARTS)
-    if len(gameThreadMembers) != 2:
+    await Helper.wait_until(gameThread, lambda: len(gameThreadMembers) == 4, WAIT_BEFORE_GAME_STARTS)
+    if len(gameThreadMembers) != 4:
         joinGameButton.disabled = True
         await gameThread.send(f"not enough people\n{gameThread.member_count}")
         await gameThread.archive(True)
@@ -1208,7 +1209,7 @@ async def HeartsGame(ctx):
     playerHands = {}
     for m in gameThreadMembers:
         playerHands[m.id] = [DECK.draw()]
-    for _ in range(20):
+    for _ in range(12):
         for m in gameThreadMembers:
             playerHands[m.id].append(DECK.draw())
 
@@ -1259,7 +1260,7 @@ async def HeartsGame(ctx):
             if '2 ♣️' in [ str(c) for c in playerHands[m.id]]: trickStarter = m.id
             print(Card(Suit.CLUBS, Value.TWO))
             print(playerHands[m.id])
-        for round in range(0,20):
+        for round in range(13):
             print(f"round {round}")
             currentTrick = {}
             for p in playerHands:
@@ -1269,7 +1270,7 @@ async def HeartsGame(ctx):
             while gameThreadMembers[0].id != trickStarter:
                 print(f"{gameThreadMembers[0].id} {trickStarter}")
                 gameThreadMembers.insert(0, gameThreadMembers.pop(-1))
-            for m in range(0,2):
+            for m in range(4):
                 print(f"player {m}")
                 p = gameThreadMembers[m].id
                 if m == 0:
@@ -1359,7 +1360,7 @@ async def HeartsGame(ctx):
         else:
             for p in totalPoints:
                 totalPoints[p] += gamePoints[p]
-                if totalPoints[p] >= 50: playing = False
+                if totalPoints[p] >= maxPoints: playing = False
             
 
         for p in totalPoints:
