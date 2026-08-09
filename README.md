@@ -5,8 +5,9 @@ Games currently supported:
  - Crazy 8s (2-4 players)
  - Tic-Tac-Toe (2 players)
  - Idiot (2-4 players)
+ - Hearts (4 players)
 
-## BalckJack
+## BlackJack
 - the goal of the game is to reach 21 points
 - numerical cards are worth the same as their number
 - face cards are worth 10
@@ -42,6 +43,14 @@ Games currently supported:
 - once a players face up cards are played, they move onto the face down cards
 - the same rules apply, but a player does not know what the card is before it is played
 
+## Hearts
+- trick taking game
+- player with the two of clubs (2♣) starts the first trick
+- player who placed the card with the highest rank of the leading suit takes the trick and leads the next trick
+- rank order (low to high): 2 3 4 5 6 7 8 9 10 J Q K A
+- each card of the hearts in the trick taken suit earns the player one point
+- the queen of spades (Q♠) earns the trick taker 13 points
+- the first player to reach a certain threshold (usually 100 or 200) loses the game
 
 
 -----------
