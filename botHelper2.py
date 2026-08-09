@@ -128,6 +128,8 @@ class Deck:
                 for v in list(Value):
                     self.deck.append(Card(s, v))
         
+        self.deck = self.deck[12:]
+        
         Shuffle(self.deck)
 
     def draw(self) -> Card:
