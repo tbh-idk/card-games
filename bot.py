@@ -1232,7 +1232,7 @@ async def HeartsGame(ctx,
         playerHands = {}
         for m in gameThreadMembers:
             playerHands[m.id] = [DECK.draw()]
-        for _ in range(19):
+        for _ in range(25):
             for m in gameThreadMembers:
                 playerHands[m.id].append(DECK.draw())
         
@@ -1370,7 +1370,7 @@ async def HeartsGame(ctx,
             
         await gameThread.send(scoreStr)
 
-    await gameThread.send(f"<@{max(totalPoints, key=gamePoints.get)} has lost the game")
+    await gameThread.send(f"<@{max(totalPoints, key=totalPoints.get)} has lost the game")
     await gameThread.archive(True)
         
 
@@ -1378,11 +1378,12 @@ async def HeartsGame(ctx,
 
 
 
-
 @bot.slash_command(name="spades",
                    description="Play a game of Spades")
-async def SpadesGame(ctx,
+async def HeartsGame(ctx,
                      max_points: Option(int, "How many points to play to?", required=False, default=500)):
+    
+
     channel = ctx.channel
     gameThread = await channel.create_thread(name=f"Spades {ctx.interaction.id}")
     gameThreadMembers = []
@@ -1392,9 +1393,9 @@ async def SpadesGame(ctx,
         gameThreadMembers.append(interaction.user)
         await gameThread.add_user(interaction.user)
         await interaction.response.send_message("Added you to game!", ephemeral=True)
-    joinGameEmbed = Embed(title="Join a game of Spades!",
-                          description="Standard Spades rules. 4 players",
-                          color=int("557d60", 16))
+    joinGameEmbed = Embed(title="Join a game of Hearts!",
+                          description="Standard Hearts rules. 4 players",
+                          color=int("4f785a", 16))
     joinGameButton = Button(label="Join",
                             style=discord.ButtonStyle.green)
     joinGameButton.callback = joinGameButtonCallback
@@ -1414,8 +1415,6 @@ async def SpadesGame(ctx,
     joinGameView.add_item(joinGameButton)
     await joinGameMessage.edit_original_response(embed=joinGameEmbed, view=joinGameView)
     await gameThread.send("game to begin shortly")
-
-    DECK = Deck()
 
     gameThreadMembers = await gameThread.fetch_members()
     for m in gameThreadMembers:
@@ -1443,14 +1442,6 @@ async def SpadesGame(ctx,
         await gameThread.archive(True)
         return
     
-
-    playerHands = {}
-    for m in gameThreadMembers:
-        playerHands[m.id] = [DECK.draw()]
-    for _ in range(12):
-        for m in gameThreadMembers:
-            playerHands[m.id].append(DECK.draw())
-
     previousInteraction = currentInteraction
     revealHandClicked = set([])
     async def revealHandCallback(interaction):
@@ -1459,72 +1450,78 @@ async def SpadesGame(ctx,
         interaction = previousInteraction[interaction.user.id]
         await interaction.response.send_message(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[interaction.user.id]))}", 
                                                 ephemeral=True)
-        #await interaction.followup.send("hi", ephemeral=True)
         revealHandClicked.add(interaction.user.id)
-        # playerInteraction[interaction.user.id] = interaction
-    revealHandButton = Button(label="See hand",
-                            style=discord.ButtonStyle.blurple)
-    revealHandButton.callback = revealHandCallback
-    revealHandView = View()
-    revealHandView.add_item(revealHandButton)
-
-    await gameThread.send("Click to see hand", view=revealHandView)
-
-    await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
-
-    chosenCard = "" # type CARD
+    
     async def askCardCallback(interaction):
-        nonlocal currentInteraction, chosenCard
-        currentInteraction[interaction.user.id] = interaction
-        chosenCard = askCard.values[0]
-        interaction = await interaction.response.defer()
+            nonlocal currentInteraction, chosenCard
+            currentInteraction[interaction.user.id] = interaction
+            chosenCard = askCard.values[0]
+            interaction = await interaction.response.defer()
 
+    partnerships = {}
+    for m in range(4):
+        partnerships[gameThreadMembers[m].id] = gameThreadMembers[(m+2)%4].id
+    partnershipsPoints = {0:0, 1:0} # index in relation to partnerships.keys
+    
 
+    carryoverBags = [0,0]
     playing = True
-    totalPoints = {}
-    for p in playerHands:
-        totalPoints[p] = 0
-
     while playing:
-        trickStarter = 0
-        heartsThrown = False
-        gamePoints = {}
-        for p in playerHands:
-            gamePoints[p] = 0
+        DECK = Deck()
 
-        for p in playerHands:
-            playerHands[p] = Card.Sort(Suit, *playerHands[p])
+        playerHands = {}
         for m in gameThreadMembers:
-            if '2 ♣️' in [ str(c) for c in playerHands[m.id]]: trickStarter = m.id
-            print(Card(Suit.CLUBS, Value.TWO))
-            print(playerHands[m.id])
-        for round in range(13):
-            print(f"round {round}")
-            currentTrick = {}
-            for p in playerHands:
-                currentTrick[p] = [0,0]
+            playerHands[m.id] = [DECK.draw()]
+        for _ in range(19):
+            for m in gameThreadMembers:
+                playerHands[m.id].append(DECK.draw())
+        
+        revealHandButton = Button(label="See hand",
+                                style=discord.ButtonStyle.blurple)
+        revealHandButton.callback = revealHandCallback
+        revealHandView = View()
+        revealHandView.add_item(revealHandButton)
 
-            # trickStarter = gameThreadMembers[0].id
-            while gameThreadMembers[0].id != trickStarter:
-                print(f"{gameThreadMembers[0].id} {trickStarter}")
-                gameThreadMembers.insert(0, gameThreadMembers.pop(-1))
-            for m in range(4):
-                print(f"player {m}")
-                p = gameThreadMembers[m].id
-                if m == 0:
-                    leading = ""
-                    if round == 0:
+        await gameThread.send("Click to see hand", view=revealHandView)
+
+        await Helper.wait_until(gameThread, lambda: len(revealHandClicked) == len(gameThreadMembers), 30)
+
+        chosenCard = "" # type CARD
+
+        
+
+        for dealer in playerHands:
+            scoreCard = {0:{'Combined Bids':0,
+                            'Tricks Taken':0}, 
+                         1:{'Combined Bids':0,
+                            'Tricks Taken':0}
+                        }
+            spadesThrown = False
+            gamePoints = {}
+            for p in playerHands:
+                gamePoints[p] = 0
+
+            for p in playerHands:
+                playerHands[p] = Card.Sort(Suit, *playerHands[p])
+
+            # TODO: bidding
+
+            for round in range(12):
+                print(f"round {round}")
+                currentTrick = {}
+                for p in playerHands:
+                    currentTrick[p] = (0,0,0)
+
+                order = list((n + (list(playerHands).index(dealer)))%4 for n in [0,1,2,3])
+                for m in order:
+                    print(f"player {m}")
+                    p = gameThreadMembers[m].id
+                    if m == 0:
+                        leading = ""
+
                         askCard = Select()
                         for card in playerHands[p]:
-                            if (card.getValue() == Value.TWO and card.getSuit() == Suit.CLUBS):
-                                askCard.add_option(label=str(card), value=f"{card}")
-                        askCard.callback = askCardCallback
-                        askCardView = View()
-                        askCardView.add_item(askCard)
-                    else:
-                        askCard = Select()
-                        for card in playerHands[p]:
-                            if (heartsThrown or  card.getSuit() != Suit.HEARTS): askCard.add_option(label=str(card), value=f"{card}")
+                            if (spadesThrown or card.getSuit() != Suit.SPADES): askCard.add_option(label=str(card), value=f"{card}")
                         if len(askCard.options) == 0:
                             askCard = Select()
                             for card in playerHands[p]:
@@ -1532,82 +1529,79 @@ async def SpadesGame(ctx,
                         askCard.callback = askCardCallback
                         askCardView = View()
                         askCardView.add_item(askCard)
-                else:
-                    askCard = Select()
-                    for card in playerHands[p]:
-                        if (card.getSuit() == leading.getSuit()):
-                            askCard.add_option(label=str(card), value=f"{card}")
-                    if len(askCard.options) == 0:
+                    else:
                         askCard = Select()
                         for card in playerHands[p]:
-                            askCard.add_option(label=str(card), value=f"{card}")
-                    askCard.callback = askCardCallback
-                    askCardView = View()
-                    askCardView.add_item(askCard)
+                            if (card.getSuit() == leading.getSuit()):
+                                askCard.add_option(label=str(card), value=f"{card}")
+                        if len(askCard.options) == 0:
+                            askCard = Select()
+                            for card in playerHands[p]:
+                                askCard.add_option(label=str(card), value=f"{card}")
+                        askCard.callback = askCardCallback
+                        askCardView = View()
+                        askCardView.add_item(askCard)
+                    
+                    chosenCard = ""
+                    print("ask card")
+                    await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[previousInteraction[p].user.id]))}\nChose a card to play", view=askCardView, ephemeral=True)
+                    await Helper.wait_until(gameThread, lambda: chosenCard != "")
+
+
+                    if chosenCard:
+                        for c in playerHands[p]: 
+                            if (str(c) == chosenCard):
+                                chosenCard = c
+                                playerHands[p].remove(c)
+                        currentTrick[p] = (chosenCard.getSuit(), chosenCard.getValue(), chosenCard.getRank())
+                        await gameThread.send(f"<@{p}> plays a {str(chosenCard)}")
+                        
+                        # TODO
+                        if currentTrick[p][0] == Suit.SPADES: spadesThrown = True
+
+                    if m == 0:
+                        print("set lead")
+                        leading = chosenCard
+
+                    
+                # decide who takes the trick
+                if Suit.SPADES in list(map(t[0] for t in currentTrick)): # contains sapdes
+                    for c in currentTrick.copy():
+                        print(c)
+                        print(f"\t{currentTrick[c][0]}\t{leading.getSuit()}")
+                        if currentTrick[c][0] != Suit.SPADES:
+                            currentTrick.pop(c)
+                else:
+                    for c in currentTrick.copy():
+                        print(c)
+                        print(f"\t{currentTrick[c][0]}\t{leading.getSuit()}")
+                        if currentTrick[c][0] != leading.getSuit():
+                            currentTrick.pop(c)
                 
-                chosenCard = ""
-                print("ask card")
-                await previousInteraction[p].followup.send(f"{', '.join(str(card) for card in Card.Sort(Suit, *playerHands[previousInteraction[p].user.id]))}\nChose a card to play", view=askCardView, ephemeral=True)
-                await Helper.wait_until(gameThread, lambda: chosenCard != "")
-
-
-                if chosenCard:
-                    for c in playerHands[p]: 
-                        if (str(c) == chosenCard):
-                            chosenCard = c
-                            playerHands[p].remove(c)
-                    currentTrick[p] = (chosenCard.getSuit(), chosenCard.getValue(), chosenCard.getRank())
-                    await gameThread.send(f"<@{p}> plays a {str(chosenCard)}")
-
-                    if currentTrick[p][0] == Suit.HEARTS: heartsThrown = True
-
-                if m == 0:
-                    print("set lead")
-                    leading = chosenCard
-
-                
-            # decide who takes the trick
-                    print("calculated trick")
-            roundPoints = 0
-            for c in currentTrick:
-                if currentTrick[c][0] == Suit.HEARTS:
-                    roundPoints+=1
-                elif currentTrick[c][0] == Suit.SPADES and currentTrick[c][1] == Value.QUEEN:
-                    roundPoints+=13
-            for c in currentTrick.copy():
-                print(c)
-                print(f"\t{currentTrick[c][0]}\t{leading.getSuit()}")
-                if currentTrick[c][0] != leading.getSuit():
-                    currentTrick.pop(c)
-            
-            trickStarter = max(currentTrick, key=lambda c: currentTrick[c][2])
-            gamePoints[trickStarter] += roundPoints
-
-            await gameThread.send(f"<@{trickStarter}> takes the trick and gets {roundPoints} points")
+                trickTaker = max(currentTrick, key=lambda c: currentTrick[c][2])
+                scoreCard[list(partnerships).index(trickTaker)%2]["Tricks Taken"] += 1
+# 
+#                 await gameThread.send(f"<@{trickStarter}> takes the trick and gets {roundPoints} points")
                 
             # set as new trick starter
 
             
         # calculate score
-        scoreStr = ""
-        if max(gamePoints.values()) == 26: 
-            moonShooter = max(gamePoints, key=gamePoints.get)
-            await gameThread.send(f"<@{moonShooter}> has shot the moon")
-            for p in totalPoints:
-                if p != moonShooter: totalPoints[p] += 26
-        else:
-            for p in totalPoints:
-                totalPoints[p] += gamePoints[p]
-                if totalPoints[p] >= max_points: playing = False
+        for g in [0,1]:
+            bag = scoreCard[g]["Tricks Taken"]-scoreCard[g]["Combined Bids"]
+            if bag>=0:
+                partnershipsPoints[g] += 10*scoreCard[g]["Combined Bids"]+bag
+            else:
+                partnershipsPoints[g] -= 10*scoreCard[g]["Combined Bids"]
+
+            carryoverBags[g] += bag
+            if carryoverBags[g] >= 10:
+                partnershipsPoints[g] -= 100
+                carryoverBags[g] -= 10
             
 
-        for p in totalPoints:
-            scoreStr += f"<@{p}> :  {totalPoints[p]} ({gamePoints[p]})\n"
             
-        await gameThread.send(scoreStr)
+        await gameThread.send("")
 
+    await gameThread.send(f"<@{max(partnershipsPoints, key=partnershipsPoints.get)} has won the game")
     await gameThread.archive(True)
-
-
-
-bot.run(TOKEN)
