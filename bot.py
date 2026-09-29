@@ -1380,7 +1380,7 @@ async def HeartsGame(ctx,
 
 @bot.slash_command(name="spades",
                    description="Play a game of Spades")
-async def HeartsGame(ctx,
+async def SpadesGame(ctx,
                      max_points: Option(int, "How many points to play to?", required=False, default=500)):
     
 
@@ -1393,8 +1393,8 @@ async def HeartsGame(ctx,
         gameThreadMembers.append(interaction.user)
         await gameThread.add_user(interaction.user)
         await interaction.response.send_message("Added you to game!", ephemeral=True)
-    joinGameEmbed = Embed(title="Join a game of Hearts!",
-                          description="Standard Hearts rules. 4 players",
+    joinGameEmbed = Embed(title="Join a game of Spades!",
+                          description="Standard Spades rules. 4 players",
                           color=int("4f785a", 16))
     joinGameButton = Button(label="Join",
                             style=discord.ButtonStyle.green)
@@ -1605,3 +1605,5 @@ async def HeartsGame(ctx,
 
     await gameThread.send(f"<@{max(partnershipsPoints, key=partnershipsPoints.get)} has won the game")
     await gameThread.archive(True)
+
+bot.run(TOKEN)
